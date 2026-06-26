@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Countdown</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Left Sidebar Panel - Matte Black */
+        .left-panel {
+            width: 350px;
+            background-color: #141414;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px;
+            border-right: 2px solid #282828;
+            box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .panel-heading {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-left: 4px solid #ffdc39;
+            padding-left: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: #aaaaaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="datetime-local"] {
+            background-color: #222222;
+            border: 1px solid #444444;
+            color: #ffffff;
+            padding: 12px 15px;
+            font-size: 1rem;
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="datetime-local"]:focus {
+            border-color: #ffdc39;
+        }
+
+        /* Custom appearance fix for calendar picker icon in dark mode */
+        input::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #ffdc39;
+            color: #000000;
+            border: none;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #ffe461;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Right Main Window - Ferrari Yellow */
+        .right-panel {
+            flex: 1;
+            background-color: #ffdc39;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Black Quad Curved Box Container */
+        .countdown-box {
+            background-color: #000000;
+            border-radius: 24px;
+            padding: 50px 70px;
+            display: flex;
+            gap: 40px;
+            align-items: baseline;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .time-segment {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Large white text for primary values */
+        .time-value {
+            color: #ffffff;
+            font-size: 5.5rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+
+        /* Smaller font size for milliseconds only */
+        .time-value.ms-value {
+            font-size: 2.5rem;
+            color: #e0e0e0;
+        }
+
+        .time-label {
+            color: #888888;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        .separator {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 4rem;
+            font-weight: 300;
+            line-height: 1;
+            align-self: center;
+            margin-top: -20px;
+        }
+
+        /* Hidden dynamic styles */
+        #days-segment, #days-separator {
+            display: none;
+        }
+
+        .placeholder-text {
+            color: #000000;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="left-panel">
+        <h2 class="panel-heading">Setup Timer</h2>
+        <form id="countdown-form">
+            <div class="form-group">
+                <label for="target-date">Target Date & Time</label>
+                <input type="datetime-local" id="target-date" required>
+            </div>
+            <button type="submit">Start Countdown</button>
+        </form>
+    </div>
+
+    <div class="right-panel" id="display-window">
+        <div class="placeholder-text" id="placeholder">Set a target date to begin</div>
+        
+        <div class="countdown-box" id="countdown-display" style="display: none;">
+            
+            <div class="time-segment" id="days-segment">
+                <span class="time-value" id="days">00</span>
+                <span class="time-label">Days</span>
+            </div>
+            <span class="separator" id="days-separator">:</span>
+
+            <div class="time-segment">
+                <span class="time-value" id="hours">00</span>
+                <span class="time-label">Hours</span>
+            </div>
+            <span class="separator">:</span>
+
+            <div class="time-segment">
+                <span class="time-value" id="minutes">00</span>
+                <span class="time-label">Mins</span>
+            </div>
+            <span class="separator">:</span>
+
+            <div class="time-segment">
+                <span class="time-value" id="seconds">00</span>
+                <span class="time-label">Secs</span>
+            </div>
+            <span class="separator">:</span>
+
+            <div class="time-segment">
+                <span class="time-value ms-value" id="ms">000</span>
+                <span class="time-label">Ms</span>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let countdownInterval = null;
+
+        // Set default minimum date-time picker limit to current local time
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('target-date').min = now.toISOString().slice(0, 16);
+
+        document.getElementById('countdown-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const inputVal = document.getElementById('target-date').value;
+            if (!inputVal) return;
+
+            const targetTime = new Date(inputVal).getTime();
+            
+            // Clear any active running countdowns
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            // Toggle visibility of layout components
+            document.getElementById('placeholder').style.display = 'none';
+            document.getElementById('countdown-display').style.display = 'flex';
+
+            const daysSegment = document.getElementById('days-segment');
+            const daysSeparator = document.getElementById('days-separator');
+
+            // DOM Element caching
+            const dEl = document.getElementById('days');
+            const hEl = document.getElementById('hours');
+            const mEl = document.getElementById('minutes');
+            const sEl = document.getElementById('seconds');
+            const msEl = document.getElementById('ms');
+
+            // High precision interval handler (~30 updates a second for smooth MS tracking)
+            countdownInterval = setInterval(() => {
+                const currentTime = new Date().getTime();
+                const difference = targetTime - currentTime;
+
+                if (difference <= 0) {
+                    clearInterval(countdownInterval);
+                    dEl.innerText = "00";
+                    hEl.innerText = "00";
+                    mEl.innerText = "00";
+                    sEl.innerText = "00";
+                    msEl.innerText = "000";
+                    return;
+                }
+
+                // Time math calculations
+                const totalHours = Math.floor(difference / (1000 * 60 * 60));
+                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                const ms = Math.floor(difference % 1000);
+
+                // Conditional Day logic: Only render day column if delta is > 24 Hours
+                if (difference > 24 * 60 * 60 * 1000) {
+                    daysSegment.style.display = 'flex';
+                    daysSeparator.style.display = 'block';
+                    dEl.innerText = String(days).padStart(2, '0');
+                    hEl.innerText = String(hours).padStart(2, '0');
+                } else {
+                    daysSegment.style.display = 'none';
+                    daysSeparator.style.display = 'none';
+                    // If less than 24 hours total, show total remaining hours directly in hours bracket
+                    hEl.innerText = String(totalHours).padStart(2, '0');
+                }
+
+                // Inject padded strings into elements
+                mEl.innerText = String(minutes).padStart(2, '0');
+                sEl.innerText = String(seconds).padStart(2, '0');
+                msEl.innerText = String(ms).padStart(3, '0');
+
+            }, 33);
+        });
+    </script>
+</body>
+</html>
